@@ -332,10 +332,8 @@ export function registerNvimMcpTools(plugin: NvimPlugin, mcpServer: McpServer, l
         try {
           await toolLogger.warn(`Executing Lua code: ${code}`);
 
-          // Execute the Lua code using nvim_exec_lua
-          // Wrap the code in a function that returns the result
-          const wrappedCode = `return (function() ${code} end)()`;
-          const result = await nvim.call('nvim_exec_lua', [wrappedCode, []]) as any;
+          // Execute the Lua code using the plugin's lua method
+          const result = await nvim.lua(code, []) as any;
 
           // Convert result to string
           let resultStr: string;
