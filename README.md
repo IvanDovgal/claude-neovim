@@ -305,6 +305,10 @@ After making changes, run `:UpdateRemotePlugins` in Neovim and restart.
 - **src/ws-transport.ts**: WebSocket transport for MCP protocol
 - **src/logger.ts**: Async logging utility with configurable log levels
 
+## Credits
+
+This project was inspired by [claudecode.nvim](https://github.com/coder/claudecode.nvim) by Coder. Special thanks for pioneering the MCP integration pattern for Neovim.
+
 ## License
 
 MIT
