@@ -30,11 +30,13 @@ return {
   dependencies = {
     { 'echasnovski/mini.diff', version = false },
   },
-  build = function()
-    vim.fn.system { 'npm', 'install' }
-    vim.fn.system { 'npm', 'run', 'build' }
-    vim.cmd 'UpdateRemotePlugins'
-  end,
+  build = 'make && nvim --headless -c "UpdateRemotePlugins" -c "qa"',
+  -- Alternative without make:
+  -- build = function()
+  --   vim.fn.system { 'npm', 'install' }
+  --   vim.fn.system { 'npm', 'run', 'build' }
+  --   vim.cmd 'UpdateRemotePlugins'
+  -- end,
   config = function()
     -- Setup mini.diff
     require('mini.diff').setup()
@@ -309,7 +311,25 @@ require('lualine').setup {
 
 ## Development
 
+### Using Make (Recommended)
+
 ```bash
+# Install dependencies and build
+make
+
+# Or run individual targets
+make install    # Install npm dependencies
+make build      # Build TypeScript code
+make dev        # Run compiler in watch mode
+make clean      # Clean build artifacts
+make help       # Show all available targets
+```
+
+### Using npm directly
+
+```bash
+cd rplugin/node/claude-nvim
+
 # Install dependencies
 npm install
 
