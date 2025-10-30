@@ -14,7 +14,7 @@ all: install build
 
 install:
 	@echo "Installing npm dependencies..."
-	cd $(PLUGIN_DIR) && npm install
+	cd $(PLUGIN_DIR) && CI=1 npm install
 
 build:
 	@echo "Building TypeScript code..."

@@ -30,11 +30,10 @@ return {
   dependencies = {
     { 'echasnovski/mini.diff', version = false },
   },
-  build = 'make && nvim --headless -c "UpdateRemotePlugins" -c "qa"',
+  build = 'CI=1 make install && make build && nvim --headless -c "UpdateRemotePlugins" -c "qa"',
   -- Alternative without make:
   -- build = function()
-  --   vim.fn.system { 'npm', 'install' }
-  --   vim.fn.system { 'npm', 'run', 'build' }
+  --   vim.fn.system('cd rplugin/node/claude-nvim && CI=1 npm install && npm run build')
   --   vim.cmd 'UpdateRemotePlugins'
   -- end,
   config = function()
