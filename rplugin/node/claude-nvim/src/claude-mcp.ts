@@ -87,8 +87,14 @@ export class ClaudeMcpServerManager {
         version: '1.0.0'
       });
 
+      // Check if unsafe Lua execution is enabled
+      const unsafeExecuteLua = await this.plugin.nvim.getVar('claude_unsafe_execute_lua') as boolean | undefined;
+      if (unsafeExecuteLua) {
+        await this.logger.warn('Unsafe Lua code execution is ENABLED via g:claude_unsafe_execute_lua');
+      }
+
       // Register all Neovim tools and get change handlers BEFORE connecting
-      const handlers = registerNvimMcpTools(this.plugin, mcpServer, this.logger);
+      const handlers = registerNvimMcpTools(this.plugin, mcpServer, this.logger, unsafeExecuteLua);
       this.changeHandlers.push(handlers);
 
       // Create transport for this WebSocket with logging

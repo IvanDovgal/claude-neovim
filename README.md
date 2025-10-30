@@ -190,6 +190,27 @@ Retrieves LSP diagnostics for files.
 
 Closes all diff windows created by the plugin.
 
+### `executeCode` (⚠️ Unsafe - Optional)
+
+**Only available when `g:claude_unsafe_execute_lua` is set to `true`.**
+
+Executes arbitrary Lua code in Neovim context.
+
+**Input:**
+- `code` (string): Lua code to execute
+
+**Returns:**
+- Result of the Lua code execution (or error message)
+
+**Example:**
+```json
+{
+  "code": "return vim.fn.getcwd()"
+}
+```
+
+⚠️ **WARNING**: This tool can execute arbitrary code and is potentially dangerous. Only enable if you understand the security implications.
+
 ## How It Works
 
 1. **MCP Server**: The plugin starts a WebSocket server on Neovim launch (or manually with `:ClaudeMcpServerStart`)
@@ -238,6 +259,14 @@ CLAUDE_IDE_LOG_LEVEL=DEBUG nvim
 ### Global Variables
 
 - `g:claude_ide_port` - Contains the port number of the running MCP server (0 when stopped). Useful for statusline integration or other custom integrations.
+
+- `g:claude_unsafe_execute_lua` - **⚠️ DANGEROUS**: When set to `true` (or `1`), enables the `executeCode` MCP tool that allows Claude to execute arbitrary Lua code in your Neovim context. This is extremely powerful but potentially dangerous. Only enable this if you understand the security implications and trust the code being executed.
+
+**Example:**
+```lua
+-- Enable unsafe Lua execution (use with caution!)
+vim.g.claude_unsafe_execute_lua = true
+```
 
 **Example statusline integration:**
 ```lua

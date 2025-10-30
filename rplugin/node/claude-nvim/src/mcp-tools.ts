@@ -14,9 +14,10 @@ interface DiffChangeHandlers {
  * @param plugin - Neovim plugin instance
  * @param mcpServer - MCP server instance to register tools on
  * @param logger - Logger instance for tool execution logging
+ * @param unsafeExecuteLua - Whether to register the unsafe executeCode tool
  * @returns Handlers for accepting/dropping changes
  */
-export function registerNvimMcpTools(plugin: NvimPlugin, mcpServer: McpServer, logger?: Logger): DiffChangeHandlers {
+export function registerNvimMcpTools(plugin: NvimPlugin, mcpServer: McpServer, logger?: Logger, unsafeExecuteLua?: boolean): DiffChangeHandlers {
   const nvim = plugin.nvim;
   const toolLogger = logger?.child('Tools') || new Logger(plugin, 'Tools');
 
@@ -316,6 +317,50 @@ export function registerNvimMcpTools(plugin: NvimPlugin, mcpServer: McpServer, l
       };
     }
   );
+
+  // Tool 5: executeCode (unsafe - only registered if enabled)
+  if (unsafeExecuteLua) {
+    mcpServer.registerTool(
+      'executeCode',
+      {
+        description: 'Execute Lua code in Neovim context. WARNING: This can execute arbitrary code and is potentially dangerous.',
+        inputSchema: {
+          code: z.string()
+        }
+      },
+      async ({ code }) => {
+        try {
+          await toolLogger.warn(`Executing Lua code: ${code}`);
+
+          // Execute the Lua code
+          const result = await nvim.call('luaeval', [code]) as any;
+
+          // Convert result to string
+          let resultStr: string;
+          if (result === null || result === undefined) {
+            resultStr = 'nil';
+          } else if (typeof result === 'object') {
+            resultStr = JSON.stringify(result, null, 2);
+          } else {
+            resultStr = String(result);
+          }
+
+          await toolLogger.info(`Lua execution result: ${resultStr}`);
+
+          return {
+            content: [{ type: 'text', text: resultStr }]
+          };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          await toolLogger.error(`Lua execution error: ${message}`);
+
+          return {
+            content: [{ type: 'text', text: `ERROR: ${message}` }]
+          };
+        }
+      }
+    );
+  }
 
   return {
     acceptChanges,
