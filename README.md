@@ -124,7 +124,9 @@ return {
     vim.keymap.set('n', '<leader>acd', ':ClaudeDrop<CR>', { desc = 'Claude Drop Changes', silent = true })
     vim.keymap.set('n', '<leader>act', ':ClaudeStartSelectionTracking<CR>', { desc = 'Claude Start Tracking', silent = true })
     vim.keymap.set('n', '<leader>acT', ':ClaudeStopSelectionTracking<CR>', { desc = 'Claude Stop Tracking', silent = true })
+    vim.keymap.set('n', '<leader>acm', ':ClaudeMentionLine<CR>', { desc = 'Claude Mention Line', silent = true })
     vim.keymap.set('v', '<leader>acm', ":'<,'>ClaudeMention<CR>", { desc = 'Claude Mention Selection', silent = true })
+    vim.keymap.set('n', '<leader>acf', ':ClaudeMentionFile<CR>', { desc = 'Claude Mention File', silent = true })
   end,
 }
 ```
@@ -152,6 +154,8 @@ return {
 - `:ClaudeStartSelectionTracking [bufnr]` - Start tracking cursor/selection in current or specified buffer
 - `:ClaudeStopSelectionTracking [bufnr]` - Stop tracking cursor/selection
 - `:ClaudeMention` - Send the current visual selection as an at-mention to Claude (use in visual mode)
+- `:ClaudeMentionFile` - Send the current file path as an at-mention to Claude (works in normal mode)
+- `:ClaudeMentionLine` - Send the current line as an at-mention to Claude (works in normal mode)
 
 ## MCP Tools
 
@@ -240,7 +244,9 @@ Selection tracking allows Claude to see your cursor position or visual selection
 2. Move your cursor or make visual selections
 3. Claude receives real-time updates about your selection
 4. Use in visual mode: `<leader>acm` to mention the selected code to Claude
-5. Disable tracking: `:ClaudeStopSelectionTracking`
+5. Use in normal mode: `<leader>acf` to mention the entire current file to Claude
+6. Use in normal mode: `<leader>acl` to mention the current line to Claude
+7. Disable tracking: `:ClaudeStopSelectionTracking`
 
 ## Configuration
 

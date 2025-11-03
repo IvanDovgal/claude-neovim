@@ -464,9 +464,9 @@ export class ClaudeMcpServerManager {
   }
 
   /**
-   * Send at_mentioned notification for a range
+   * Send at_mentioned notification
    */
-  async sendAtMention(filePath: string, lineStart: number, lineEnd: number): Promise<void> {
+  async sendAtMention(options: { filePath: string; lineStart?: number; lineEnd?: number }): Promise<void> {
     if (!this.wss) {
       return;
     }
@@ -474,11 +474,7 @@ export class ClaudeMcpServerManager {
     const notification = {
       jsonrpc: '2.0' as const,
       method: 'at_mentioned',
-      params: {
-        filePath,
-        lineStart,
-        lineEnd
-      }
+      params: options
     };
 
     const notificationStr = JSON.stringify(notification);
@@ -800,6 +796,12 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
           return;
         }
 
+        // Check if buffer is modified
+        const isModified = await plugin.nvim.call('getbufvar', [buffer.id, '&modified']) as number;
+        if (isModified) {
+          await commandLogger?.warn('Buffer has unsaved changes');
+        }
+
         // Get visual selection marks
         const startPos = await plugin.nvim.call('getpos', ["'<"]) as [number, number, number, number];
         const endPos = await plugin.nvim.call('getpos', ["'>"]) as [number, number, number, number];
@@ -813,7 +815,7 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const lineStart = startPos[1] - 1;
         const lineEnd = endPos[1] - 1;
 
-        await serverManager.sendAtMention(filePath, lineStart, lineEnd);
+        await serverManager.sendAtMention({ filePath, lineStart, lineEnd });
         await commandLogger?.info(`Mentioned lines ${startPos[1]}-${endPos[1]} in ${filePath}`);
 
       } catch (error) {
@@ -823,6 +825,80 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
     },
     {
       range: '',
+      sync: false
+    }
+  );
+
+  // Command: ClaudeMentionFile
+  plugin.registerCommand(
+    'ClaudeMentionFile',
+    async () => {
+      try {
+        if (!serverManager || !serverManager.isRunning()) {
+          await commandLogger?.warn('Claude MCP Server is not running');
+          return;
+        }
+
+        const buffer = await plugin.nvim.buffer;
+        const filePath = await buffer.name;
+
+        if (!filePath) {
+          await commandLogger?.warn('Buffer has no file path');
+          return;
+        }
+
+        await serverManager.sendAtMention({ filePath });
+        await commandLogger?.info(`Mentioned file ${filePath}`);
+
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        await commandLogger?.error(`Failed to send file at-mention: ${message}`);
+      }
+    },
+    {
+      sync: false
+    }
+  );
+
+  // Command: ClaudeMentionLine
+  plugin.registerCommand(
+    'ClaudeMentionLine',
+    async () => {
+      try {
+        if (!serverManager || !serverManager.isRunning()) {
+          await commandLogger?.warn('Claude MCP Server is not running');
+          return;
+        }
+
+        const buffer = await plugin.nvim.buffer;
+        const filePath = await buffer.name;
+
+        if (!filePath) {
+          await commandLogger?.warn('Buffer has no file path');
+          return;
+        }
+
+        // Check if buffer is modified
+        const isModified = await plugin.nvim.call('getbufvar', [buffer.id, '&modified']) as number;
+        if (isModified) {
+          await commandLogger?.warn('Buffer has unsaved changes');
+        }
+
+        // Get current cursor position
+        const cursorPos = await plugin.nvim.call('getcurpos') as [number, number, number, number, number];
+
+        // Convert from 1-indexed (Vim) to 0-indexed (at_mentioned)
+        const lineStart = cursorPos[1] - 1;
+
+        await serverManager.sendAtMention({ filePath, lineStart });
+        await commandLogger?.info(`Mentioned line ${cursorPos[1]} in ${filePath}`);
+
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        await commandLogger?.error(`Failed to send line at-mention: ${message}`);
+      }
+    },
+    {
       sync: false
     }
   );
