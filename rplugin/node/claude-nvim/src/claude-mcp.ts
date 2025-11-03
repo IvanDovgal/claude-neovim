@@ -889,8 +889,9 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
 
         // Convert from 1-indexed (Vim) to 0-indexed (at_mentioned)
         const lineStart = cursorPos[1] - 1;
+        const lineEnd = cursorPos[1] - 1;
 
-        await serverManager.sendAtMention({ filePath, lineStart });
+        await serverManager.sendAtMention({ filePath, lineStart, lineEnd });
         await commandLogger?.info(`Mentioned line ${cursorPos[1]} in ${filePath}`);
 
       } catch (error) {
