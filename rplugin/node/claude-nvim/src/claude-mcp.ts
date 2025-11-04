@@ -784,7 +784,7 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
     async () => {
       try {
         if (!serverManager || !serverManager.isRunning()) {
-          await commandLogger?.warn('Claude MCP Server is not running');
+          await plugin.nvim.call('nvim_echo', [[['Claude MCP Server is not running', 'WarningMsg']], true, {}]);
           return;
         }
 
@@ -792,14 +792,14 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const filePath = await buffer.name;
 
         if (!filePath) {
-          await commandLogger?.warn('Buffer has no file path');
+          await plugin.nvim.call('nvim_echo', [[['Buffer has no file path', 'WarningMsg']], true, {}]);
           return;
         }
 
         // Check if buffer is modified
         const isModified = await plugin.nvim.call('getbufvar', [buffer.id, '&modified']) as number;
         if (isModified) {
-          await commandLogger?.warn('Buffer has unsaved changes');
+          await plugin.nvim.call('nvim_echo', [[['Buffer has unsaved changes', 'WarningMsg']], true, {}]);
         }
 
         // Get visual selection marks
@@ -807,7 +807,7 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const endPos = await plugin.nvim.call('getpos', ["'>"]) as [number, number, number, number];
 
         if (startPos[1] === 0 || endPos[1] === 0) {
-          await commandLogger?.warn('No visual selection');
+          await plugin.nvim.call('nvim_echo', [[['No visual selection', 'WarningMsg']], true, {}]);
           return;
         }
 
@@ -816,11 +816,10 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const lineEnd = endPos[1] - 1;
 
         await serverManager.sendAtMention({ filePath, lineStart, lineEnd });
-        await commandLogger?.info(`Mentioned lines ${startPos[1]}-${endPos[1]} in ${filePath}`);
 
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        await commandLogger?.error(`Failed to send at-mention: ${message}`);
+        await plugin.nvim.call('nvim_echo', [[['Failed to send at-mention: ' + message, 'ErrorMsg']], true, {}]);
       }
     },
     {
@@ -835,7 +834,7 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
     async () => {
       try {
         if (!serverManager || !serverManager.isRunning()) {
-          await commandLogger?.warn('Claude MCP Server is not running');
+          await plugin.nvim.call('nvim_echo', [[['Claude MCP Server is not running', 'WarningMsg']], true, {}]);
           return;
         }
 
@@ -843,16 +842,15 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const filePath = await buffer.name;
 
         if (!filePath) {
-          await commandLogger?.warn('Buffer has no file path');
+          await plugin.nvim.call('nvim_echo', [[['Buffer has no file path', 'WarningMsg']], true, {}]);
           return;
         }
 
         await serverManager.sendAtMention({ filePath });
-        await commandLogger?.info(`Mentioned file ${filePath}`);
 
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        await commandLogger?.error(`Failed to send file at-mention: ${message}`);
+        await plugin.nvim.call('nvim_echo', [[['Failed to send file at-mention: ' + message, 'ErrorMsg']], true, {}]);
       }
     },
     {
@@ -866,7 +864,7 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
     async () => {
       try {
         if (!serverManager || !serverManager.isRunning()) {
-          await commandLogger?.warn('Claude MCP Server is not running');
+          await plugin.nvim.call('nvim_echo', [[['Claude MCP Server is not running', 'WarningMsg']], true, {}]);
           return;
         }
 
@@ -874,14 +872,14 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const filePath = await buffer.name;
 
         if (!filePath) {
-          await commandLogger?.warn('Buffer has no file path');
+          await plugin.nvim.call('nvim_echo', [[['Buffer has no file path', 'WarningMsg']], true, {}]);
           return;
         }
 
         // Check if buffer is modified
         const isModified = await plugin.nvim.call('getbufvar', [buffer.id, '&modified']) as number;
         if (isModified) {
-          await commandLogger?.warn('Buffer has unsaved changes');
+          await plugin.nvim.call('nvim_echo', [[['Buffer has unsaved changes', 'WarningMsg']], true, {}]);
         }
 
         // Get current cursor position
@@ -892,11 +890,10 @@ export function registerClaudeMcpCommands(plugin: NvimPlugin): void {
         const lineEnd = cursorPos[1] - 1;
 
         await serverManager.sendAtMention({ filePath, lineStart, lineEnd });
-        await commandLogger?.info(`Mentioned line ${cursorPos[1]} in ${filePath}`);
 
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        await commandLogger?.error(`Failed to send line at-mention: ${message}`);
+        await plugin.nvim.call('nvim_echo', [[['Failed to send line at-mention: ' + message, 'ErrorMsg']], true, {}]);
       }
     },
     {
